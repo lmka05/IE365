@@ -6,7 +6,7 @@ import os
 
 
 def get_dataloaders(data_dir, img_size, batch_size, augment=False):
-    base = os.path.join(data_dir, 'split')
+    base = os.path.join(data_dir, 'splits')
 
 
     train_tf = transforms.Compose([
