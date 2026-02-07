@@ -29,6 +29,7 @@ def get_args():
 def main():
     args = get_args()
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
 
     train_dl, val_dl, test_dl = get_dataloaders(
         args.data_dir,
