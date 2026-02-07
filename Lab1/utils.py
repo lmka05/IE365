@@ -65,7 +65,7 @@ def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
         val_loss = train_one_epoch(
             model, val_dl, loss_fn, optimizer, device
         )
-        acc, _ = evaluate(model, val_dl, device)
+        acc, _.__, __, __= evaluate(model, val_dl, device)
         train_loss_list.append(train_loss)
         val_loss_list.append(val_loss)
         val_acc_list.append(acc)
