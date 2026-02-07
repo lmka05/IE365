@@ -1,6 +1,17 @@
 import torch
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+import matplotlib.pyplot as plt
 
+def get_optimizer(model, args):
+    if args.optimizer == "adam":
+        return torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    elif args.optimizer == "sgd":
+        return torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
+    else:
+        raise ValueError(f"Unknown optimizer: {args.optimizer}")
+    
+def get_loss_fn():
+    return torch.nn.CrossEntropyLoss()
 
 def train_one_epoch(model, loader, loss_fn, optimizer, device):
     model.train()
@@ -10,7 +21,8 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device):
         x, y = x.to(device), y.to(device)
 
         optimizer.zero_grad()
-        loss = loss_fn(model(x), y)
+        pred = model(x)
+        loss = loss_fn(pred, y)
         loss.backward()
         optimizer.step()
 
@@ -39,16 +51,12 @@ def evaluate(model, loader, device):
     return acc, p, r, f1
 
 
-def train(model, train_dl, val_dl, args, device):
-    loss_fn = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(
-        model.parameters(),
-        lr=args.lr,
-        weight_decay=args.weight_decay
-    )
-
+def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
     best_val_loss = float("inf")
     wait = 0
+    train_loss_list = []
+    val_loss_list = []
+    val_acc_list = []
 
     for epoch in range(args.epochs):
         train_loss = train_one_epoch(
@@ -57,8 +65,11 @@ def train(model, train_dl, val_dl, args, device):
         val_loss = train_one_epoch(
             model, val_dl, loss_fn, optimizer, device
         )
-
-        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}")
+        acc, _ = evaluate(model, val_dl, device)
+        train_loss_list.append(train_loss)
+        val_loss_list.append(val_loss)
+        val_acc_list.append(acc)
+        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_loss={val_loss:.4f}, val_acc={acc:.4f}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -69,3 +80,20 @@ def train(model, train_dl, val_dl, args, device):
             if wait >= args.patience:
                 print("Early stopping triggered.")
                 break
+        return train_loss_list, val_loss_list, val_acc_list
+
+def plot_training_curves(train_loss_list, val_loss_list, val_acc_list):
+    epochs = range(1, len(train_loss_list) + 1)
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_loss_list, label="Train Loss")
+    plt.plot(epochs, val_loss_list, label="Validation Loss")
+    plt.plot(epochs, val_acc_list, label="Validation Accuracy")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Value")
+    plt.title("Training & Validation Curves")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
