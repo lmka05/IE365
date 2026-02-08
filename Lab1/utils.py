@@ -80,7 +80,7 @@ def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
             if wait >= args.patience:
                 print("Early stopping triggered.")
                 break
-        return train_loss_list, val_loss_list, val_acc_list
+    return train_loss_list, val_loss_list, val_acc_list
 
 def plot_training_curves(train_loss_list, val_loss_list, val_acc_list):
     epochs = range(1, len(train_loss_list) + 1)
