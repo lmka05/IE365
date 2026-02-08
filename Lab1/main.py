@@ -1,5 +1,8 @@
 import argparse
 import torch
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
 from dataset import get_dataloaders
 from model import build_model
 from utils import train, evaluate, get_loss_fn, get_optimizer, plot_training_curves
@@ -45,8 +48,14 @@ def main():
     train_loss_list, val_loss_list, val_acc_list = train(model, train_dl, val_dl, loss_fn, optimizer, args, device)
     plot_training_curves(train_loss_list, val_loss_list, val_acc_list)
 
-    acc, p, r, f1 = evaluate(model, test_dl, device)
+    acc, p, r, f1,y_true, y_pred = evaluate(model, test_dl, device)
     print(f"Test results on test set: Acc={acc:.4f}, 'Precision={p:.4f}, Recall={r:.4f}, F1={f1:.4f}")
+    cm = confusion_matrix(y_true, y_pred)
+    print("Confusion matrix on test set: \n")
+    sns.heatmap(cm, annot=True, fmt="d")
+    plt.show()
+
+
 
 
 if __name__ == "__main__":

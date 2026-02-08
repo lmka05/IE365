@@ -48,7 +48,7 @@ def evaluate(model, loader, device):
     p, r, f1, _ = precision_recall_fscore_support(
         y_true, y_pred, average="weighted"
     )
-    return acc, p, r, f1
+    return acc, p, r, f1, y_true, y_pred
 
 
 def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
@@ -65,7 +65,7 @@ def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
         val_loss = train_one_epoch(
             model, val_dl, loss_fn, optimizer, device
         )
-        acc, _.__, __, __= evaluate(model, val_dl, device)
+        acc, _, _, _, _, _= evaluate(model, val_dl, device)
         train_loss_list.append(train_loss)
         val_loss_list.append(val_loss)
         val_acc_list.append(acc)
@@ -84,16 +84,25 @@ def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
 
 def plot_training_curves(train_loss_list, val_loss_list, val_acc_list):
     epochs = range(1, len(train_loss_list) + 1)
+    fig, axes = plt.subplots(1,2,figsize=(12, 5))
+    axes =axes.flatten()
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(epochs, train_loss_list, label="Train Loss")
-    plt.plot(epochs, val_loss_list, label="Validation Loss")
-    plt.plot(epochs, val_acc_list, label="Validation Accuracy")
+    axes[0].plot(epochs, train_loss_list, label="Train Loss")
+    axes[0].plot(epochs, val_loss_list, label="Validation Loss")
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Loss")
+    axes[0].set_title("Training & Validation Loss")
+    axes[0].legend()
+    axes[0].grid(True)
 
-    plt.xlabel("Epoch")
-    plt.ylabel("Value")
-    plt.title("Training & Validation Curves")
-    plt.legend()
-    plt.grid(True)
+    axes[1].plot(epochs, val_acc_list, label="Validation Accuracy")
+    axes[1].set_xlabel("Epoch")
+    axes[1].set_ylabel("Accuracy")
+    axes[1].set_title("Validation Accuracy")
+    axes[1].legend()
+    axes[1].grid(True)
+    
     plt.tight_layout()
     plt.show()
+    
+
