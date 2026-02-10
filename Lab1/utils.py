@@ -43,24 +43,27 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device):
     return total_loss / len(loader)
 
 
-def evaluate(model, loader, device):
+def evaluate(model, loader, loss_fn, device):
     model.eval()
     y_true, y_pred = [], []
+    total_loss = 0.0
 
     with torch.no_grad():
         for x, y in loader:
-            x = x.to(device)
+            x,y = x.to(device), y.to(device)
             outputs = model(x)
+            loss = loss_fn(outputs, y)
+            total_loss += loss.item()
             preds = outputs.argmax(dim=1).cpu().numpy()
 
             y_pred.extend(preds)
             y_true.extend(y.numpy())
-
+    avg_loss = total_loss /len(loader)
     acc = accuracy_score(y_true, y_pred)
     p, r, f1, _ = precision_recall_fscore_support(
         y_true, y_pred, average="weighted"
     )
-    return acc, p, r, f1, y_true, y_pred
+    return acc, p, r, f1, y_true, y_pred, avg_loss
 
 
 def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
@@ -74,10 +77,7 @@ def train(model, train_dl, val_dl, loss_fn, optimizer, args, device):
         train_loss = train_one_epoch(
             model, train_dl, loss_fn, optimizer, device
         )
-        val_loss = train_one_epoch(
-            model, val_dl, loss_fn, optimizer, device
-        )
-        acc, _, _, _, _, _= evaluate(model, val_dl, device)
+        acc, _, _, _, _, _, val_loss = evaluate(model, val_dl, loss_fn,device)
         train_loss_list.append(train_loss)
         val_loss_list.append(val_loss)
         val_acc_list.append(acc)

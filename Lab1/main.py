@@ -50,7 +50,7 @@ def main():
     train_loss_list, val_loss_list, val_acc_list = train(model, train_dl, val_dl, loss_fn, optimizer, args, device)
     plot_training_curves(train_loss_list, val_loss_list, val_acc_list)
 
-    acc, p, r, f1,y_true, y_pred = evaluate(model, test_dl, device)
+    acc, p, r, f1,y_true, y_pred, _ = evaluate(model, test_dl, loss_fn, device)
     print(f"Test results on test set: Acc={acc:.4f}, Precision={p:.4f}, Recall={r:.4f}, F1={f1:.4f}")
     cm = confusion_matrix(y_true, y_pred)
     print("Confusion matrix on test set: \n")
