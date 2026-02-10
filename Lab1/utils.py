@@ -57,7 +57,7 @@ def evaluate(model, loader, loss_fn, device):
             preds = outputs.argmax(dim=1).cpu().numpy()
 
             y_pred.extend(preds)
-            y_true.extend(y.numpy())
+            y_true.extend(y.cpu().numpy())
     avg_loss = total_loss /len(loader)
     acc = accuracy_score(y_true, y_pred)
     p, r, f1, _ = precision_recall_fscore_support(
