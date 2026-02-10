@@ -12,13 +12,17 @@ def get_dataloaders(data_dir, img_size, batch_size, augment=False):
     train_tf = transforms.Compose([
     transforms.Resize((img_size, img_size)),
     transforms.RandomHorizontalFlip() if augment else transforms.Lambda(lambda x: x),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],
+                        [0.229, 0.224, 0.225])
     ])
 
 
     test_tf = transforms.Compose([
     transforms.Resize((img_size, img_size)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],
+                        [0.229, 0.224, 0.225])
     ])
 
 

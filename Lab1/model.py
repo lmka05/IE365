@@ -1,36 +1,36 @@
 import torch.nn as nn
+import torch
 
 class SimpleCNN(nn.Module):
-    def __init__(self, dropout_rate=0.0):
+    def __init__(self, img_size=128, dropout_rate=0.0, num_classes=2):
         super(SimpleCNN, self).__init__()
-        # Feature Extraction
+
         self.features = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.Conv2d(3, 16, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(16, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2)
+            nn.MaxPool2d(2)
         )
-        
-        # Classifier
+
+        self.flat_size = (img_size // 8) * (img_size // 8) * 64
+
         self.classifier = nn.Sequential(
-            nn.Flatten(),
-            # Input size: 128 channels * (IMG_SIZE/8) * (IMG_SIZE/8)
-            # Với ảnh 224x224 -> qua 3 lần MaxPool (/8) -> 28x28
-            nn.Linear(128 * 28 * 28, 512), 
+            nn.Linear(self.flat_size, 128),
             nn.ReLU(),
-            nn.Dropout(p=dropout_rate), # Dropout cho Exp-2 [cite: 47]
-            nn.Linear(512, 2) # Output: Cat, Dog
+            nn.Dropout(dropout_rate),
+            nn.Linear(128, num_classes)
         )
 
     def forward(self, x):
         x = self.features(x)
+        x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
 
